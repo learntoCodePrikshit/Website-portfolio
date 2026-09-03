@@ -9,20 +9,51 @@ dotenv.config();
 
 const app = express();
 
+// ================================
 // Middleware
+// ================================
+
 app.use(express.json());
+
+const allowedOrigins = [
+  "https://prikshitcsengineer.com",
+  "https://www.prikshitcsengineer.com",
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+];
 
 app.use(
   cors({
-    origin: [
-      "https://prikshitcsengineer.com",
-      "https://www.prikshitcsengineer.com",
+    origin: function (origin, callback) {
+      // Allow requests with no origin
+      // Example: Postman, server-to-server requests
+      if (!origin) {
+        return callback(null, true);
+      }
 
-      // Keep these for local development
-      "http://localhost:5173",
-      "http://localhost:3000",
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error("Not allowed by CORS")
+      );
+    },
+
+    methods: [
+      "GET",
+      "POST",
+      "PUT",
+      "DELETE",
+      "OPTIONS",
     ],
-    methods: ["GET", "POST", "PUT", "DELETE"],
+
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+    ],
+
     credentials: true,
   })
 );
@@ -31,13 +62,26 @@ app.use(
 // MongoDB Connection
 // ================================
 
+const mongoURI = process.env.MONGO_URI;
+
+if (!mongoURI) {
+  console.error(
+    "MONGO_URI is missing from environment variables"
+  );
+
+  process.exit(1);
+}
+
 mongoose
-  .connect(process.env.MONGO_URI)
+  .connect(mongoURI)
   .then(() => {
     console.log("MongoDB connected successfully");
   })
   .catch((error) => {
-    console.error("MongoDB connection error:", error);
+    console.error(
+      "MongoDB connection error:",
+      error
+    );
   });
 
 // ================================
@@ -46,11 +90,38 @@ mongoose
 
 app.use("/api/contact", contactRoutes);
 
-// Test route
+// ================================
+// Test Route
+// ================================
+
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Portfolio backend is running",
+  });
+});
+
+// ================================
+// 404 Handler
+// ================================
+
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: "Route not found",
+  });
+});
+
+// ================================
+// Error Handler
+// ================================
+
+app.use((error, req, res, next) => {
+  console.error("Server error:", error);
+
+  res.status(500).json({
+    success: false,
+    message: error.message || "Internal server error",
   });
 });
 
@@ -61,5 +132,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(
+    `Server running on port ${PORT}`
+  );
 });
