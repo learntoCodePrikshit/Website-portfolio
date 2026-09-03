@@ -75,7 +75,7 @@ function Biodata() {
       }
     } catch (error) {
       console.error("Contact submission error:", error);
-
+      alert(error.message);
       setStatus(
         "Unable to send message. Please try again."
       );
