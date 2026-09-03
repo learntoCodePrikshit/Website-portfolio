@@ -112,7 +112,7 @@ function Home() {
 
           <img
             src={images[index]}
-            style={{ height: "800px", width: "600px", marginTop: "0px" }}
+            style={{ height: "400px", width: "400px", marginTop: "0px" }}
           />
           <button onClick={prev}>⬅ prev</button>
           <button onClick={next}>➡ next</button>
@@ -126,7 +126,7 @@ function Home() {
             </button>
           </p>
           <br />
-          <p class="moving-paragraph">
+          <p className="moving-paragraph">
             Hello, I have good knowledge in following areas:
             <br />
 
@@ -135,11 +135,11 @@ function Home() {
 
             <br />
             <br />
+          </p>
             <h2 className="bounce-text">About Me</h2>
             <br />
             <span className="glow-text">I am passionate about web development and enjoy building creative and responsive websites. I like exploring new technologies and improving my skills by working on practical projects. My goal is to continuously grow as a developer and create useful web applications.
             I help companies in making attractive, user engaging, user friendly and responsive websites.</span>
-          </p>
 
           <Link to="/education">View more information</Link>
         </div>

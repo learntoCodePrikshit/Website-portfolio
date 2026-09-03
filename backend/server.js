@@ -9,65 +9,71 @@ dotenv.config();
 
 const app = express();
 
-// ================================
-// Middleware
-// ================================
-
-app.use(express.json());
+// ==========================================
+// CORS
+// ==========================================
 
 const allowedOrigins = [
-  "https://prikshitcsengineer.com",
-  "https://www.prikshitcsengineer.com",
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://localhost:3000",
+  "https://prikshitcsengineer.com",
+  "https://www.prikshitcsengineer.com",
 ];
 
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      // Allow requests with no origin
-      // Example: Postman, server-to-server requests
-      if (!origin) {
-        return callback(null, true);
-      }
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests without Origin
+    // Example: Postman, curl, server-to-server
+    if (!origin) {
+      return callback(null, true);
+    }
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
 
-      return callback(
-        new Error("Not allowed by CORS")
-      );
-    },
+    console.log("Blocked CORS origin:", origin);
 
-    methods: [
-      "GET",
-      "POST",
-      "PUT",
-      "DELETE",
-      "OPTIONS",
-    ],
+    return callback(new Error("Not allowed by CORS"));
+  },
 
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-    ],
+  methods: [
+    "GET",
+    "POST",
+    "PUT",
+    "DELETE",
+    "OPTIONS",
+  ],
 
-    credentials: true,
-  })
-);
+  allowedHeaders: [
+    "Content-Type",
+    "Authorization",
+  ],
 
-// ================================
-// MongoDB Connection
-// ================================
+  credentials: true,
+};
+
+// IMPORTANT: CORS should come before routes
+app.use(cors(corsOptions));
+
+// Explicitly handle OPTIONS preflight requests
+app.options(/.*/, cors(corsOptions));
+
+// ==========================================
+// Body parser
+// ==========================================
+
+app.use(express.json());
+
+// ==========================================
+// MongoDB
+// ==========================================
 
 const mongoURI = process.env.MONGO_URI;
 
 if (!mongoURI) {
-  console.error(
-    "MONGO_URI is missing from environment variables"
-  );
+  console.error("MONGO_URI is missing");
 
   process.exit(1);
 }
@@ -84,15 +90,15 @@ mongoose
     );
   });
 
-// ================================
-// Routes
-// ================================
+// ==========================================
+// Contact route
+// ==========================================
 
 app.use("/api/contact", contactRoutes);
 
-// ================================
-// Test Route
-// ================================
+// ==========================================
+// Test route
+// ==========================================
 
 app.get("/", (req, res) => {
   res.status(200).json({
@@ -101,9 +107,9 @@ app.get("/", (req, res) => {
   });
 });
 
-// ================================
-// 404 Handler
-// ================================
+// ==========================================
+// 404
+// ==========================================
 
 app.use((req, res) => {
   res.status(404).json({
@@ -112,22 +118,22 @@ app.use((req, res) => {
   });
 });
 
-// ================================
-// Error Handler
-// ================================
+// ==========================================
+// Error handler
+// ==========================================
 
-app.use((error, req, res, next) => {
-  console.error("Server error:", error);
+app.use((err, req, res, next) => {
+  console.error("Server error:", err);
 
   res.status(500).json({
     success: false,
-    message: error.message || "Internal server error",
+    message: err.message || "Internal server error",
   });
 });
 
-// ================================
+// ==========================================
 // Server
-// ================================
+// ==========================================
 
 const PORT = process.env.PORT || 5000;
 

@@ -39,6 +39,7 @@ router.post("/", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Unable to send message. Please try again later.",
+      error: error.message,
     });
   }
 });
