@@ -3,30 +3,30 @@ import Contact from "../models/Contact.js";
 
 const router = express.Router();
 
-// POST /api/contact
 router.post("/", async (req, res) => {
   try {
     console.log("POST /api/contact received:", req.body);
 
     const { name, email, mobile, message } = req.body;
 
-    // Validate required fields
-    if (!name?.trim() || !email?.trim() || !mobile?.trim() || !message?.trim()) {
+    if (
+      !name?.trim() ||
+      !email?.trim() ||
+      !mobile?.trim() ||
+      !message?.trim()
+    ) {
       return res.status(400).json({
         success: false,
         message: "All fields are required",
       });
     }
 
-    // Create and save contact in MongoDB
     const savedContact = await Contact.create({
       name: name.trim(),
       email: email.trim().toLowerCase(),
       mobile: mobile.trim(),
       message: message.trim(),
     });
-
-    console.log("Contact saved successfully:", savedContact._id);
 
     return res.status(201).json({
       success: true,
@@ -38,7 +38,7 @@ router.post("/", async (req, res) => {
 
     return res.status(500).json({
       success: false,
-      message: "Unable to send message. Please try again later.",
+      message: "Unable to send message",
       error: error.message,
     });
   }
