@@ -1,0 +1,1 @@
+mongodb+srv://prikshit:<db_password>@cluster0.wond76h.mongodb.net/?appName=Cluster0
